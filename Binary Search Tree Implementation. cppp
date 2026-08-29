@@ -1,8 +1,7 @@
 #include <iostream>
-#include <stack>
+#include <queue>
 using namespace std;
 
-// Node structure
 struct Node
 {
     int data;
@@ -10,180 +9,146 @@ struct Node
     Node *right;
 };
 
-// Binary Search Tree
 class BST
 {
-public:
     Node *root;
 
+public:
     BST()
     {
         root = NULL;
     }
 
-    // Insert a node
-    void insert(Node *&temp, int value)
+    // Recursive insertion
+    void insert(int value)
+    {
+        root = insertNode(root, value);
+    }
+
+    Node* insertNode(Node *temp, int value)
     {
         if (temp == NULL)
         {
-            temp = new Node;
-            temp->data = value;
-            temp->left = NULL;
-            temp->right = NULL;
-            return;
+            Node *newNode = new Node;
+            newNode->data = value;
+            newNode->left = NULL;
+            newNode->right = NULL;
+            return newNode;
         }
 
         if (value < temp->data)
-            insert(temp->left, value);
+            temp->left = insertNode(temp->left, value);
         else
-            insert(temp->right, value);
+            temp->right = insertNode(temp->right, value);
+
+        return temp;
     }
 
-    // Non-recursive Inorder Traversal
-    void inorder()
+    // Level-wise traversal
+    void levelOrder()
     {
         if (root == NULL)
-        {
-            cout << "Tree is empty.\n";
             return;
-        }
 
-        stack<Node *> nodes;
-        Node *current = root;
+        queue<Node*> q;
+        q.push(root);
 
-        while (current != NULL || !nodes.empty())
+        while (!q.empty())
         {
-            while (current != NULL)
-            {
-                nodes.push(current);
-                current = current->left;
-            }
+            Node *temp = q.front();
+            q.pop();
 
-            current = nodes.top();
-            nodes.pop();
+            cout << temp->data << " ";
 
-            cout << current->data << " ";
-            current = current->right;
+            if (temp->left != NULL)
+                q.push(temp->left);
+
+            if (temp->right != NULL)
+                q.push(temp->right);
         }
 
         cout << endl;
     }
 
-    // Non-recursive Preorder Traversal
-    void preorder()
+    // Find height
+    int height()
     {
-        if (root == NULL)
-        {
-            cout << "Tree is empty.\n";
-            return;
-        }
+                return findHeight(root);
+    }
 
-        stack<Node *> nodes;
-        nodes.push(root);
+    int findHeight(Node *temp)
+    {
+        if (temp == NULL)
+            return -1;
 
-        while (!nodes.empty())
-        {
-            Node *current = nodes.top();
-            nodes.pop();
+        int leftHeight = findHeight(temp->left);
+        int rightHeight = findHeight(temp->right);
 
-            cout << current->data << " ";
+        return (1 + max(leftHeight, rightHeight));
+    }
 
-            if (current->right != NULL)
-                nodes.push(current->right);
-
-            if (current->left != NULL)
-                nodes.push(current->left);
-        }
-
+    // Print leaf nodes
+    void printLeafNodes()
+    {
+        printLeaves(root);
         cout << endl;
     }
 
-    // Non-recursive Postorder Traversal
-    void postorder()
+    void printLeaves(Node *temp)
     {
-        if (root == NULL)
+        if (temp == NULL)
+            return;
+
+        if (temp->left == NULL && temp->right == NULL)
         {
-            cout << "Tree is empty.\n";
+            cout << temp->data << " ";
             return;
         }
 
-        stack<Node *> first, second;
-        first.push(root);
-
-        while (!first.empty())
-        {
-            Node *current = first.top();
-            first.pop();
-
-            second.push(current);
-
-            if (current->left != NULL)
-                first.push(current->left);
-
-            if (current->right != NULL)
-                first.push(current->right);
-        }
-
-        while (!second.empty())
-        {
-            Node *current = second.top();
-            second.pop();
-
-            cout << current->data << " ";
-        }
-
-        cout << endl;
+        printLeaves(temp->left);
+        printLeaves(temp->right);
     }
 };
 
-// Main function
 int main()
 {
-    BST tree;
-    int choice, value;
-
-    do
+    BST original, newTree;
+    int choice,value;
+do
     {
-        cout << "\n========== BST MENU ==========";
-        cout << "\n1. Insert Node";
-        cout << "\n2. Inorder Traversal";
-        cout << "\n3. Preorder Traversal";
-        cout << "\n4. Postorder Traversal";
+        cout << "\n===== Binary Tree Menu =====";
+        cout << "\n1.Insert Node in Binary Search  Tree";
+        cout << "\n2. Original BST (Level-wise)";
+        cout << "\n3. Height of Original BST:";
+        cout << "\n4. Leaf Nodes of Original BST";
         cout << "\n5. Exit";
-
         cout << "\nEnter your choice: ";
         cin >> choice;
 
         switch (choice)
         {
         case 1:
-            cout << "Enter value: ";
-            cin >> value;
-            tree.insert(tree.root, value);
-            cout << "Node inserted successfully.\n";
+            cout<<"Enter value to be inserted:   ";
+            cin>>value;
+            original.insert(value);
             break;
 
         case 2:
-            cout << "Inorder Traversal: ";
-            tree.inorder();
-            break;
-
+            original.levelOrder();
+                break;
         case 3:
-            cout << "Preorder Traversal: ";
-            tree.preorder();
+    cout << "Height of Original BST: "
+         << original.height() << endl;
+         break;
+  case 4:
+    cout << "Leaf Nodes of Original BST: ";
+    original.printLeafNodes();
+    break;
+     case 5:
+            cout << "Program Exited.";
             break;
-
-        case 4:
-            cout << "Postorder Traversal: ";
-            tree.postorder();
-            break;
-
-        case 5:
-            cout << "Program exited.\n";
-            break;
-
-        default:
-            cout << "Invalid choice!\n";
+  default:
+            cout << "Invalid Choice!";
         }
 
     } while (choice != 5);
